@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Celery Realtime</title>
+
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+</head>
+<body>
+  <h1>Celery Realtime</h1>
+
+  <form class="" action="" method="post">
+    {% csrf_token %}
+    <input type="submit" name="" value="Exportar">
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    // Conectamos con el socket en el servidor de Node
+    var socket = io('ws://localhost:3000');
+
+    /* Cualquier mensaje que se reciba en el canal "result"
+    se agrega dentro del div "result" */
+    socket.on('result', function(csvURL) {
+      var result = document.getElementById('result');
+      var aTag = document.createElement('a');
+      aTag.setAttribute('href', csvURL);
+      aTag.setAttribute('target', '_blank');
+      aTag.innerHTML = "Descargar archivo";
+      result.appendChild(aTag);
+    });
+
+    /* Cuando se presione el botón de submit se envía
+    una petición POST AJAX a la vista para ejecutar la tarea */
+    var submit = $('input[type="submit"]');
+    submit.on('click', function (event) {
+      $.ajax({
+        type: 'POST',
+        url: "{% url 'realtime' %}",
+        data: $('form').serialize(),
+        success: function(celeryTaskId)
+        {
+          /* La vista devuelve el ID de la tarea de Celery
+          y se lo envíamos al server para que sepa a cuál canal
+          suscribirse */
+          socket.emit('subscribe', celeryTaskId);
+        }
+      });
+
+      event.preventDefault();
+    });
+  </script>
+</body>
+</html>
