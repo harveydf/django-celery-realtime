@@ -1,0 +1,1 @@
+Todo el código del tutorial [https://harveydf.com/celery-en-tiempo-real-con-sockets](https://harveydf.com/celery-en-tiempo-real-con-sockets)
